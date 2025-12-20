@@ -1,55 +1,22 @@
-#: package Microsoft.Data.Analysis@0.23.0
-#: package Microsoft.ML@5.0.0
+#:package Microsoft.Data.Analysis@0.23.0
+#:package Microsoft.ML@5.0.0
 
 using Microsoft.Data.Analysis;
 using Microsoft.ML;
 
-const string DATASET_CSV_PATH = "./data.csv";
-const string MISSING_VALUE_REPLACEMENT = "unknown";
+// dataFrame -> tabular data (columns and rows)
+DataFrame dataFrame = DataFrame.LoadCsv("./data.csv");
 
-const string MODEL_SAVE_PATH = "./model.zip";
-
-DataFrame dataFrame = DataFrame.LoadCsv(DATASET_CSV_PATH);
-
-// Rename the columns to lowercase
+// Rename columns to lowercase
 foreach (var column in dataFrame.Columns)
 {
     dataFrame.Columns.RenameColumn(column.Name, column.Name.ToLower());
 }
 
-long numberOfRecords = dataFrame.Rows.Count;
-// Handle the missing values
-// Numerical columns -> Replace the null values with MODE (value with highest count)
-// Categorical columns -> Replace the empty or null strings with "unknown" token
-foreach (var column in dataFrame.Columns)
-{
-    bool isNumericColumn = column.IsNumericColumn();
-
-    if (isNumericColumn)
-    {
-        // ValueCounts -> a dataframe with 2 columns: Values and Counts
-        // This dataframe will have ALL DISTINCT VALUES with thier COUNTS
-        var valueCounts = column.ValueCounts().OrderByDescending("Counts", putNullValuesLast: true);
-        var mode = (float)valueCounts["Values"][0];
-        column.FillNulls(mode, inPlace: true);
-        continue;
-    }
-
-    int nullValues = 0;
-    for (int i = 0; i < numberOfRecords; i++)
-    {
-        if (string.IsNullOrEmpty(dataFrame[column.Name][i]?.ToString()))
-        {
-            nullValues++;
-            dataFrame[column.Name][i] = MISSING_VALUE_REPLACEMENT;
-        }
-    }
-}
-
-// Train the Binary Classifier Model -> Predict a "Label" based on "Features"
 // Select relevant features
 // Drop columns irrelevant to the gameplay
 string[] relevantColumns = [
+    // FEATURES
     "age",
     "region",
     "income",
@@ -61,95 +28,118 @@ string[] relevantColumns = [
     "ltv", // loan amount to property value ratio
     "rate_of_interest",
     "term", // duration
+
+    // LABEL
     "status" // the label column for prediction
 ];
 
-string[] irrelevantColumns = [.. dataFrame.Columns.Select(column => column.Name).Where(name => !relevantColumns.Contains(name))];
+string[] irrelevantColumns = [.. dataFrame.Columns
+    .Select(column => column.Name)
+    .Where(columnName => !relevantColumns.Contains(columnName))
+];
 
-foreach (var column in irrelevantColumns)
+foreach (var columnName in irrelevantColumns)
 {
-    dataFrame.Columns.Remove(column);
+    dataFrame.Columns.Remove(columnName);
+}
+// Handling the missing values
+// Two types of columns -> Numeric (float) and Categorical (string)
+// Numeric Column -> Replace NULLs with MODE (value with highest count)
+// Categorical Column -> Replace NULLs and ""s with "unknown"
+
+foreach (var column in dataFrame.Columns)
+{
+    bool isNumericColumn = column.IsNumericColumn();
+
+    // numeric column
+    if (isNumericColumn)
+    {
+        // valueCounts is a DataFrame with two columns -> "Values" and "Counts"
+        DataFrame valueCounts = column.ValueCounts();
+        var mode = (float)valueCounts.OrderByDescending("Counts")["Values"][0];
+        column.FillNulls(mode, inPlace: true);
+        continue;
+    }
+
+    // categorical column
+    for (int i = 0; i < dataFrame.Rows.Count; i++)
+    {
+        if (string.IsNullOrEmpty(dataFrame[column.Name][i]?.ToString()))
+        {
+            dataFrame[column.Name][i] = "unknown";
+        }
+    }
 }
 
-string labelColumnName = "status";
+// Train the Model (Binary Classifier)
 
-// Convert the numeric status column to boolean
-// i.e, 1 to true and 0 to false
-bool[] booleanStatuses = [.. (dataFrame[labelColumnName] as SingleDataFrameColumn)!.Select(status => status == 1)];
-dataFrame.Columns.Remove(labelColumnName);
-dataFrame.Columns.Add(new PrimitiveDataFrameColumn<bool>(labelColumnName, booleanStatuses));
+// features (X) -> all data used as "input" for the model
+// label (y) -> the "output" (prediction) of the model
+// Binary classifier -> the "label" can have 2 possible values (status = 0 or 1)
 
-// ACTUALLY TRAINING NOW!!!
 MLContext mlContext = new();
 
-// Preare the dataset (DONE)
-// Train-test split (splitting the dataset into two separate dataset - training and testing)
-// train on the training dataset
-// evaluate predictions made on the testing dataset (see the metrics)
-
-// Train test split
-var trainTestData = mlContext.Data.TrainTestSplit(
-    dataFrame,
-    testFraction: 0.15// 15% of the total data is used for testing and 85% for training
-);
-
-
-DataFrame trainData = trainTestData.TrainSet.ToDataFrame(maxRows: numberOfRecords);
-DataFrame testData = trainTestData.TestSet.ToDataFrame(maxRows: numberOfRecords);
-
+string labelColumnName = "status";
 string featuresColumnName = "features";
 string normalizedFeaturesColumnName = "normalized_" + featuresColumnName;
 
-DataFrameColumn[] featureColumns = [.. trainData.Columns.Where(column => column.Name != labelColumnName)];
+DataFrameColumn[] featuresColumns = [.. dataFrame.Columns.Where(column => column.Name != labelColumnName)];
 
-// Pipeline -> series of chained methods to transform the dataframe into a trained model
-IEstimator<ITransformer> dataProcessingPipeline =
-// encode the categorical columns - one hot encoding
+// convert the status column to boolean
+var booleanStatusColumn = new PrimitiveDataFrameColumn<bool>(labelColumnName,
+    [.. (dataFrame[labelColumnName] as PrimitiveDataFrameColumn<float>)!.Select(status => status == 1)]
+);
+dataFrame.Columns.Remove(labelColumnName);
+dataFrame.Columns.Add(booleanStatusColumn);
 
-// gender - "male", "female" and "others"
-// gender = "male"
+// split the dataframe to two subsets - train data and test data -> Train-Test Split
+// 0.15 -> 15% of the data is used for testing, 85% for training
+var trainTestData = mlContext.Data.TrainTestSplit(dataFrame, testFraction: 0.15);
 
-// gender = [1,0,0]
-mlContext.Transforms.Categorical.OneHotEncoding([
-    ..featureColumns.Where(column => !column.IsNumericColumn())
-    .Select(column => new InputOutputColumnPair(column.Name))
-],
-outputKind: Microsoft.ML.Transforms.OneHotEncodingEstimator.OutputKind.Indicator,
-keyOrdinality: Microsoft.ML.Transforms.ValueToKeyMappingEstimator.KeyOrdinality.ByValue
+var trainData = trainTestData.TrainSet.ToDataFrame(maxRows: dataFrame.Rows.Count);
+var testData = trainTestData.TestSet.ToDataFrame(maxRows: dataFrame.Rows.Count);
+
+DataFrame.SaveCsv(trainData, "./train-data.csv");
+DataFrame.SaveCsv(testData, "./test-data.csv");
+
+// untrained transformer -> pipeline with steps to "transform" the data to weights of the final model
+// 1. Encode the categorical columns (everything in the model has to be numeric)
+var dataProcessingPipeline = mlContext.Transforms.Categorical.OneHotEncoding(
+    [.. featuresColumns
+        .Where(column => !column.IsNumericColumn())
+        .Select(column => new InputOutputColumnPair(column.Name))]
 )
-// features concatenation -> convert all features to a vector named "features"
-// X -> y
-.Append(mlContext.Transforms.Concatenate(featuresColumnName, [
-    ..featureColumns.Select(column => column.Name)
-]))
-// relevant columns -> features and status
-// normalization -> converting all columns to have mean = 0 and variance = 1
-.Append(mlContext.Transforms.NormalizeMeanVariance(
+
+// 2. Feature concatenation (we use the "X" matrix as input)
+.Append(mlContext.Transforms.Concatenate(
+    outputColumnName: featuresColumnName,
+    inputColumnNames: [.. featuresColumns.Select(column => column.Name)])
+
+// 3. Normalization (mean = 0 & variance = 1 -> improve speed and stability)
+).Append(mlContext.Transforms.NormalizeMeanVariance(
     outputColumnName: normalizedFeaturesColumnName,
     inputColumnName: featuresColumnName
-));
 
-// Train the model
-// classification, regression, recommendation, ...
-var trainer = mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression(
+// 4. Train the classifier
+)).Append(mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression(
     labelColumnName: labelColumnName,
     featureColumnName: normalizedFeaturesColumnName
-);
+));
 
-// Actually train the model fr
-var model = dataProcessingPipeline.Append(trainer).Fit(trainData);
+// To train the model (Trained Transformer) -> <UNTRAINED_TRANSFORMER>.Fit(data_with_schema: IDataView) 
+// (can be saved for future use)
+var model = dataProcessingPipeline.Fit(dataFrame);
 
-var testPredictions = model.Transform(trainData);
+mlContext.Model.Save(model, (dataFrame as IDataView).Schema, "./model.zip");
+
+// To make predictions (actual transformations) -> <TRAINED_TRANSFORMER>.Transform(actual_data: IDataView)
+var predictions = model.Transform(testData);
 
 var metrics = mlContext.BinaryClassification.Evaluate(
-    data: testPredictions,
+    data: predictions,
     labelColumnName: labelColumnName
 );
 
-Console.WriteLine($"\n\nModel trained with accuracy: {metrics.Accuracy}\n\n");
+Console.WriteLine($"Accuracy of the model: {metrics.Accuracy}");
 
-// POSITIVE -> status = True
-// NEGATIVE -> status = False
 Console.WriteLine(metrics.ConfusionMatrix.GetFormattedConfusionTable());
-
-mlContext.Model.Save(model, (dataFrame as IDataView).Schema, MODEL_SAVE_PATH);

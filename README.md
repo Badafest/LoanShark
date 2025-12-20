@@ -1,13 +1,6 @@
 # 🦈 Loan Shark
 
-A simple interactive browser game where the player takes the role of a lender.
-
-Using a real Machine Learning model trained to predict loan default, the player is shown loan applications and must decide:
-
-- Whether to approve or reject the loan
-- What interest rate, tenure, and (optionally) upfront charges to offer
-
-The ML model then predicts whether the chosen loan terms would default or not, and the game rewards or penalizes the player based on the result.
+A simple interactive browser game where the player takes the role of a "loan shark" (loan lender).
 
 ## 🎮 Game Concept
 
@@ -19,7 +12,7 @@ Each round presents a loan applicant with features such as:
 - Credit Score
 - Age ...
 
-These values are either sampled from the test dataset or generated using controlled simulation.
+These values are generated using controlled simulation.
 
 ### 2. Player Decision
 
@@ -43,8 +36,13 @@ Based on the prediction:
 
 ## 📃 To-Do
 
-- [ ] Train the binary classifier model (data cleaning, preprocessing, training, evaluation)
+- [ ] Train the binary classifier model
 - [ ] Prepare a synthetic data generator for gameplay
-- [ ] Build the backend to load the model and return loan default predictions
+- [ ] Build the backend to load the model and make predictions
 - [ ] Create the browser-based game UI where users review loan applications and make decisions
 - [ ] Integrate the game UI with the prediction API and implement scoring logic
+
+# ⚙️ Requirements
+
+- .NET 10 SDK
+- Visual Studio Code with C# Dev Kit & .NET Extension Pack
