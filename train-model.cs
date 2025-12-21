@@ -128,7 +128,7 @@ var dataProcessingPipeline = mlContext.Transforms.Categorical.OneHotEncoding(
 
 // To train the model (Trained Transformer) -> <UNTRAINED_TRANSFORMER>.Fit(data_with_schema: IDataView) 
 // (can be saved for future use)
-var model = dataProcessingPipeline.Fit(dataFrame);
+var model = dataProcessingPipeline.Fit(trainData);
 
 mlContext.Model.Save(model, (dataFrame as IDataView).Schema, "./model.zip");
 
