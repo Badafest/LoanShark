@@ -83,12 +83,15 @@ string labelColumnName = "status";
 string featuresColumnName = "features";
 string normalizedFeaturesColumnName = "normalized_" + featuresColumnName;
 
-DataFrameColumn[] featuresColumns = [.. dataFrame.Columns.Where(column => column.Name != labelColumnName)];
+DataFrameColumn[] featuresColumns = [.. dataFrame.Columns
+    .Where(column => column.Name != labelColumnName)];
 
 // convert the status column to boolean
 var booleanStatusColumn = new PrimitiveDataFrameColumn<bool>(labelColumnName,
-    [.. (dataFrame[labelColumnName] as PrimitiveDataFrameColumn<float>)!.Select(status => status == 1)]
+    [.. (dataFrame[labelColumnName] as PrimitiveDataFrameColumn<float>)!
+        .Select(status => status == 1)]
 );
+
 dataFrame.Columns.Remove(labelColumnName);
 dataFrame.Columns.Add(booleanStatusColumn);
 
@@ -118,15 +121,15 @@ var dataProcessingPipeline = mlContext.Transforms.Categorical.OneHotEncoding(
 // 3. Normalization (mean = 0 & variance = 1 -> improve speed and stability)
 ).Append(mlContext.Transforms.NormalizeMeanVariance(
     outputColumnName: normalizedFeaturesColumnName,
-    inputColumnName: featuresColumnName
+    inputColumnName: featuresColumnName)
 
 // 4. Train the classifier
-)).Append(mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression(
+).Append(mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression(
     labelColumnName: labelColumnName,
     featureColumnName: normalizedFeaturesColumnName
 ));
 
-// To train the model (Trained Transformer) -> <UNTRAINED_TRANSFORMER>.Fit(data_with_schema: IDataView) 
+// To train the model (Trained Transformer) -> <UNTRAINED_TRANSFORMER>.Fit(training_data: IDataView) 
 // (can be saved for future use)
 var model = dataProcessingPipeline.Fit(trainData);
 
