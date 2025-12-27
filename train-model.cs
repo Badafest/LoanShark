@@ -7,14 +7,7 @@ using Microsoft.ML;
 // dataFrame -> tabular data (columns and rows)
 DataFrame dataFrame = DataFrame.LoadCsv("./data.csv");
 
-// Rename columns to lowercase
-foreach (var column in dataFrame.Columns)
-{
-    dataFrame.Columns.RenameColumn(column.Name, column.Name.ToLower());
-}
-
 // Select relevant features
-// Drop columns irrelevant to the gameplay
 string[] relevantColumns = [
     // FEATURES
     "age",
@@ -33,22 +26,28 @@ string[] relevantColumns = [
     "status" // the label column for prediction
 ];
 
-string[] irrelevantColumns = [.. dataFrame.Columns
-    .Select(column => column.Name)
-    .Where(columnName => !relevantColumns.Contains(columnName))
-];
+string[] columnNames = [.. dataFrame.Columns.Select(column => column.Name)];
 
-foreach (var columnName in irrelevantColumns)
+foreach (var originalColumnName in columnNames)
 {
-    dataFrame.Columns.Remove(columnName);
-}
-// Handling the missing values
-// Two types of columns -> Numeric (float) and Categorical (string)
-// Numeric Column -> Replace NULLs with MODE (value with highest count)
-// Categorical Column -> Replace NULLs and ""s with "unknown"
+    string columnName = originalColumnName.ToLower();
 
-foreach (var column in dataFrame.Columns)
-{
+    // Rename columns to lowercase
+    dataFrame.Columns.RenameColumn(originalColumnName, columnName);
+
+    // Drop columns irrelevant to the gameplay
+    if (!relevantColumns.Contains(columnName))
+    {
+        dataFrame.Columns.Remove(columnName: columnName);
+        continue;
+    }
+
+    // Handling the missing values
+    // Two types of columns -> Numeric (float) and Categorical (string)
+    // Numeric Column -> Replace NULLs with MODE (value with highest count)
+    // Categorical Column -> Replace NULLs and ""s with "unknown"
+    var column = dataFrame.Columns[columnName];
+
     bool isNumericColumn = column.IsNumericColumn();
 
     // numeric column
@@ -62,14 +61,22 @@ foreach (var column in dataFrame.Columns)
     }
 
     // categorical column
-    for (int i = 0; i < dataFrame.Rows.Count; i++)
-    {
-        if (string.IsNullOrEmpty(dataFrame[column.Name][i]?.ToString()))
-        {
-            dataFrame[column.Name][i] = "unknown";
-        }
-    }
+    dataFrame[columnName] = new StringDataFrameColumn(columnName, [
+        ..(dataFrame[columnName] as StringDataFrameColumn)!.Select(value =>
+            string.IsNullOrEmpty(value)?"unknown":value)
+    ]);
 }
+
+string labelColumnName = "status";
+
+// convert the label column to boolean
+dataFrame[labelColumnName] = new PrimitiveDataFrameColumn<bool>(labelColumnName,
+    [.. (dataFrame[labelColumnName] as PrimitiveDataFrameColumn<float>)!
+        .Select(status => status == 1)]
+);
+
+// Save the processed data
+DataFrame.SaveCsv(dataFrame, "./processed-data.csv");
 
 // Train the Model (Binary Classifier)
 
@@ -79,21 +86,12 @@ foreach (var column in dataFrame.Columns)
 
 MLContext mlContext = new();
 
-string labelColumnName = "status";
 string featuresColumnName = "features";
 string normalizedFeaturesColumnName = "normalized_" + featuresColumnName;
 
 DataFrameColumn[] featuresColumns = [.. dataFrame.Columns
     .Where(column => column.Name != labelColumnName)];
 
-// convert the status column to boolean
-var booleanStatusColumn = new PrimitiveDataFrameColumn<bool>(labelColumnName,
-    [.. (dataFrame[labelColumnName] as PrimitiveDataFrameColumn<float>)!
-        .Select(status => status == 1)]
-);
-
-dataFrame.Columns.Remove(labelColumnName);
-dataFrame.Columns.Add(booleanStatusColumn);
 
 // split the dataframe to two subsets - train data and test data -> Train-Test Split
 // 0.15 -> 15% of the data is used for testing, 85% for training
@@ -133,7 +131,7 @@ var dataProcessingPipeline = mlContext.Transforms.Categorical.OneHotEncoding(
 // (can be saved for future use)
 var model = dataProcessingPipeline.Fit(trainData);
 
-mlContext.Model.Save(model, (dataFrame as IDataView).Schema, "./model.zip");
+mlContext.Model.Save(model, (trainData as IDataView).Schema, "./model.zip");
 
 // To make predictions (actual transformations) -> <TRAINED_TRANSFORMER>.Transform(actual_data: IDataView)
 var predictions = model.Transform(testData);

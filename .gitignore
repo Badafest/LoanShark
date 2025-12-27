@@ -9,6 +9,8 @@
 model.zip
 test-data.csv
 train-data.csv
+processed-data.csv
+cdfs.json
 
 # User-specific files
 *.rsuser
