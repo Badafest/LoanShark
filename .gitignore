@@ -11,6 +11,7 @@ test-data.csv
 train-data.csv
 processed-data.csv
 cdfs.json
+plots
 
 # User-specific files
 *.rsuser
