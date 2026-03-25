@@ -38,7 +38,7 @@ Based on the prediction:
 
 - [x] Train the binary classifier model
 - [x] Prepare a synthetic data generator for gameplay
-- [ ] Build the backend to load the model and make predictions
+- [x] Build the backend to load the model and make predictions
 - [ ] Create the browser-based game UI where users review loan applications and make decisions
 - [ ] Integrate the game UI with the prediction API and implement scoring logic
 
