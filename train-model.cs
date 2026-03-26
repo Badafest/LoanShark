@@ -4,8 +4,20 @@
 using Microsoft.Data.Analysis;
 using Microsoft.ML;
 
+const string RAW_DATA_PATH = "./data/data.csv";
+const string TRAIN_DATA_PATH = "./data/train-data.csv";
+const string TEST_DATA_PATH = "./data/test-data.csv";
+const string PROCESSED_DATA_PATH = "./data/processed-data.csv";
+const string MODEL_PATH = "./lib/model.zip";
+
+string modelDir = Path.GetDirectoryName(MODEL_PATH)!;
+if (!Directory.Exists(modelDir))
+{
+    Directory.CreateDirectory(modelDir);
+}
+
 // dataFrame -> tabular data (columns and rows)
-DataFrame dataFrame = DataFrame.LoadCsv("./data.csv");
+DataFrame dataFrame = DataFrame.LoadCsv(RAW_DATA_PATH);
 
 // Select relevant features
 string[] relevantColumns = [
@@ -76,7 +88,7 @@ dataFrame[labelColumnName] = new PrimitiveDataFrameColumn<bool>(labelColumnName,
 );
 
 // Save the processed data
-DataFrame.SaveCsv(dataFrame, "./processed-data.csv");
+DataFrame.SaveCsv(dataFrame, PROCESSED_DATA_PATH);
 
 // Train the Model (Binary Classifier)
 
@@ -100,8 +112,8 @@ var trainTestData = mlContext.Data.TrainTestSplit(dataFrame, testFraction: 0.15)
 var trainData = trainTestData.TrainSet.ToDataFrame(maxRows: dataFrame.Rows.Count);
 var testData = trainTestData.TestSet.ToDataFrame(maxRows: dataFrame.Rows.Count);
 
-DataFrame.SaveCsv(trainData, "./train-data.csv");
-DataFrame.SaveCsv(testData, "./test-data.csv");
+DataFrame.SaveCsv(trainData, TRAIN_DATA_PATH);
+DataFrame.SaveCsv(testData, TEST_DATA_PATH);
 
 // untrained transformer -> pipeline with steps to "transform" the data to weights of the final model
 // 1. Encode the categorical columns (everything in the model has to be numeric)
@@ -131,7 +143,7 @@ var dataProcessingPipeline = mlContext.Transforms.Categorical.OneHotEncoding(
 // (can be saved for future use)
 var model = dataProcessingPipeline.Fit(trainData);
 
-mlContext.Model.Save(model, (trainData as IDataView).Schema, "./model.zip");
+mlContext.Model.Save(model, (trainData as IDataView).Schema, MODEL_PATH);
 
 // To make predictions (actual transformations) -> <TRAINED_TRANSFORMER>.Transform(actual_data: IDataView)
 var predictions = model.Transform(testData);

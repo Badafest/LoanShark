@@ -9,7 +9,18 @@ using Microsoft.Data.Analysis;
 using Microsoft.ML;
 using Plotly.NET.CSharp;
 
-DataFrame dataFrame = DataFrame.LoadCsv("./processed-data.csv");
+const string PROCESSED_DATA_PATH = "./data/processed-data.csv";
+const string PLOTS_DIR_PATH = "./plots";
+const string MODEL_PATH = "./lib/model.zip";
+const string CDFS_JSON_PATH = "./lib/cdfs.json";
+
+
+if (!Directory.Exists(PLOTS_DIR_PATH))
+{
+    Directory.CreateDirectory(PLOTS_DIR_PATH);
+}
+
+DataFrame dataFrame = DataFrame.LoadCsv(PROCESSED_DATA_PATH);
 
 int totalDefaulted = dataFrame["status"].Cast<bool>()
     .Count(status => status);
@@ -80,7 +91,7 @@ Chart.Grid(
     SubPlotTitles: new(dataFrame.Columns.Select(column => $"Histogram for {column.Name}"), true)
 )
 .WithSize(800, 500 * dataFrame.Columns.Count)
-.SaveHtml($"./plots/histograms.html");
+.SaveHtml(Path.Combine(PLOTS_DIR_PATH, "histograms.html"));
 
 
 // cumulative distribution function
@@ -169,15 +180,15 @@ Chart.Grid(
     SubPlotTitles: new(dataFrame.Columns.Select(column => $"CDF for {column.Name}"), true)
 )
 .WithSize(800, 500 * dataFrame.Columns.Count)
-.SaveHtml($"./plots/cdfs.html");
+.SaveHtml(Path.Combine(PLOTS_DIR_PATH, "cdfs.html"));
 
-File.WriteAllText("./cdfs.json", JsonSerializer.Serialize(cdfs,
+File.WriteAllText(CDFS_JSON_PATH, JsonSerializer.Serialize(cdfs,
     CdfsSourceGenerationContext.Default.DictionaryStringDictionarySingleSingle));
 
 var random = new Random();
 
 cdfs = JsonSerializer.Deserialize(
-    File.ReadAllText("./cdfs.json"),
+    File.ReadAllText(CDFS_JSON_PATH),
     CdfsSourceGenerationContext.Default.DictionaryStringDictionarySingleSingle
 )!;
 
@@ -208,7 +219,7 @@ Chart.Grid(
     SubPlotTitles: new(syntheticData.Columns.Select(column => $"Histogram for {column.Name} (Synthetic Data)"), true)
 )
 .WithSize(800, 500 * syntheticData.Columns.Count)
-.SaveHtml($"./plots/synthetic-histograms.html");
+.SaveHtml(Path.Combine(PLOTS_DIR_PATH, "synthetic-histograms.html"));
 
 
 // revert age and region columns
@@ -248,7 +259,7 @@ Console.WriteLine($"\nSYNTHETIC DATA\n{syntheticData.Head(5)}\n");
 
 var mlContext = new MLContext();
 
-var model = mlContext.Model.Load("./model.zip", out var inputSchema);
+var model = mlContext.Model.Load(MODEL_PATH, out var inputSchema);
 
 var gameplayData = model.Transform(syntheticData);
 
