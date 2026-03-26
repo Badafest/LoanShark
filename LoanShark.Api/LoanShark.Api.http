@@ -1,11 +1,11 @@
-@LoanShark.Api_HostAddress = http://localhost:5272/api
+@Api_HostAddress = http://localhost:5000/api
 
-GET {{LoanShark.Api_HostAddress}}/generate?n=2
+GET {{Api_HostAddress}}/generate?n=2
 Accept: application/json
 
 ###
 
-POST {{LoanShark.Api_HostAddress}}/predict
+POST {{Api_HostAddress}}/predict
 Accept: application/json
 Content-Type: application/json
 

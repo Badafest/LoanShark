@@ -9,10 +9,10 @@ using Microsoft.Data.Analysis;
 using Microsoft.ML;
 using Plotly.NET.CSharp;
 
-const string PROCESSED_DATA_PATH = "../data/processed-data.csv";
-const string PLOTS_DIR_PATH = "../plots";
-const string MODEL_PATH = "./model.zip";
-const string CDFS_JSON_PATH = "./cdfs.json";
+const string PROCESSED_DATA_PATH = "./data/processed-data.csv";
+const string PLOTS_DIR_PATH = "./plots";
+const string MODEL_PATH = "./lib/model.zip";
+const string CDFS_JSON_PATH = "./lib/cdfs.json";
 
 
 if (!Directory.Exists(PLOTS_DIR_PATH))

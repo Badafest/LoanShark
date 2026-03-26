@@ -4,11 +4,17 @@
 using Microsoft.Data.Analysis;
 using Microsoft.ML;
 
-const string RAW_DATA_PATH = "../data/data.csv";
-const string TRAIN_DATA_PATH = "../data/train-data.csv";
-const string TEST_DATA_PATH = "../data/test-data.csv";
-const string PROCESSED_DATA_PATH = "../data/processed-data.csv";
-const string MODEL_PATH = "./model.zip";
+const string RAW_DATA_PATH = "./data/data.csv";
+const string TRAIN_DATA_PATH = "./data/train-data.csv";
+const string TEST_DATA_PATH = "./data/test-data.csv";
+const string PROCESSED_DATA_PATH = "./data/processed-data.csv";
+const string MODEL_PATH = "./lib/model.zip";
+
+string modelDir = Path.GetDirectoryName(MODEL_PATH)!;
+if (!Directory.Exists(modelDir))
+{
+    Directory.CreateDirectory(modelDir);
+}
 
 // dataFrame -> tabular data (columns and rows)
 DataFrame dataFrame = DataFrame.LoadCsv(RAW_DATA_PATH);
