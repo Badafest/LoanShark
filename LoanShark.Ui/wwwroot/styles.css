@@ -1,0 +1,71 @@
+/* Import Fredoka font */
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap");
+
+:root {
+  --background: #fdfbf0;
+  --green: #4ea320;
+  --blue: #004cb0;
+  --red: #bd000d;
+}
+
+* {
+  user-select: none;
+  outline: none;
+}
+
+/* Apply to the whole app */
+body {
+  font-family: "Fredoka", sans-serif;
+  background-color: var(--background);
+  margin: 0;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  width: 100dvw;
+  height: 100dvh;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a90e2' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+button:hover,
+a:hover {
+  transform: rotate(-6deg);
+}
+
+button {
+  all: unset;
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0.8rem 1.6rem;
+  margin: 0;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+}
+
+a {
+  background: var(--background);
+  padding: 0.25rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+button:hover {
+  outline: 0.25rem solid;
+  outline-offset: 0.15rem;
+}
