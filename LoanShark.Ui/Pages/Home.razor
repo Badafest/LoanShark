@@ -1,8 +1,9 @@
 ﻿@page "/"
+@inject NavigationManager NavManager
 
 <h1 id="game-title">LOAN SHARK</h1>
 
-<button id="play-button">
+<button id="play-button" @onclick="GoToGame">
     <span>PLAY</span>
     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="0" stroke="none"
          height="1.25rem">
@@ -11,4 +12,11 @@
               clip-rule="evenodd" />
     </svg>
 </button>
+
+@code {
+    void GoToGame()
+    {
+        NavManager.NavigateTo("/play");
+    }
+}
 

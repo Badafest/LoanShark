@@ -1,20 +1,33 @@
 footer {
   position: sticky;
-  bottom: 0;
+  bottom: 0rem;
   font-size: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 2.5rem;
   padding: 1rem;
+  background: var(--background);
 }
 
 header {
+  position: sticky;
+  top: 0;
   padding: 0.5rem 1rem;
+  background: var(--background);
 }
 
 #bgm-control {
-  color: var(--red);
   outline: none;
-  margin-left: auto;
+  padding: 0;
+}
+
+header > nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header > nav > * {
+  color: var(--red);
 }
