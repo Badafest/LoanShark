@@ -1,74 +1,74 @@
 @page "/play"
-@using LoanShark.Ui.Entities
-@inject IJSRuntime JS
+@inject IJSRuntime jsRuntime
+@inject GameData gameData
+@inject NavigationManager navManager
 
-@if (applicants.Count() > currentApplicant)
-{
 
-    <div>
-        <div class="top-bar">
-            <h2>@(currentApplicant + 1)/@totalApplicants</h2>
-            <div class="button-group top-buttons">
-                <button class="btn deny-btn" @onclick="Deny" disabled="@submitted">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="5"
-                         stroke="currentColor" height="1.5rem">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <button class="btn lend-btn" @onclick="Lend" disabled="@submitted">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="5"
-                         stroke="currentColor" height="1.5rem">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                    </svg>
-                </button>
-            </div>
+<div>
+    <div class="top-bar">
+        <div>
+            <span>Application</span>
+            <h2>@(applicantIndex + 1)/@gameData.TotalApplicants</h2>
         </div>
-        <div class="card">
-            <div class="card-body">
-                @* APPLICANT DETAILS - CAN NOT CHANGE *@
-                <div class="col-md-6">
-                    <p>Age Group: @applicants[currentApplicant].Age</p>
-                    <p>Region: @applicants[currentApplicant].Region</p>
-                    <p>Income: $@applicants[currentApplicant].Income.ToString("N0")</p>
-                    <p>Property Value: $@applicants[currentApplicant].PropertyValue.ToString("N0")</p>
-                    <p>Credit Score: @applicants[currentApplicant].CreditScore</p>
-                    <p>Debt: $@((applicants[currentApplicant].DebtToIncomeRatio *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            applicants[currentApplicant].Income).ToString("N0"))</p>
-                    </div>
-                    @* LOAN DETAILS - PLAYER CAN CHANGE DEFAULT VALUES *@
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Loan Amount:</label>
-                            <input type="number" @bind="loanAmount" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                            <label>Rate of Interest (%):</label>
-                            <input type="number" step="0.01" @bind="rateOfInterest" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                            <label>Upfront Charges:</label>
-                            <input type="number" @bind="upfrontCharges" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                            <label>Term (years):</label>
-                            <input type="number" @bind="term" class="form-control" step='0.5' />
-                        </div>
-                    </div>
+        <div>
+            <span>Balance</span>
+            <h2>@gameData.Balance.ToString("C0")</h2>
+        </div>
+        <div class="button-group top-buttons">
+            <button class="btn deny-btn" @onclick="Deny" disabled="@(gameData.State == GameState.PREDICTING)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="5"
+                     stroke="currentColor" height="1.5rem">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <button class="btn lend-btn" @onclick="Lend" disabled="@(gameData.State == GameState.PREDICTING)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="5"
+                     stroke="currentColor" height="1.5rem">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            @* APPLICANT DETAILS - CAN NOT CHANGE *@
+            <div>
+                <p>Age Group: @currentApplicant.Age</p>
+                <p>Income: @currentApplicant.Income.ToString("C0")</p>
+                <p>Debt: @((currentApplicant.DebtToIncomeRatio * currentApplicant.Income).ToString("C0"))</p>
+                <p>Property Value: @currentApplicant.PropertyValue.ToString("C0")</p>
+                <p>Credit Score: @currentApplicant.CreditScore</p>
+            </div>
+            @* LOAN DETAILS - PLAYER CAN CHANGE DEFAULT VALUES *@
+            <div>
+                <div class="form-group">
+                    <label>Loan Amount:</label>
+                    <input type="number" @bind="loanAmount" class="form-control" />
                 </div>
+                <div class="form-group">
+                    <label>Interest Rate (%):</label>
+                    <input type="number" step="0.01" @bind="rateOfInterest" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Upfront Charges:</label>
+                    <input type="number" @bind="upfrontCharges" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Term (years):</label>
+                    <input type="number" @bind="term" class="form-control" step='0.5' />
+                </div>
+                <p style="color: var(--red)">@validationError</p>
             </div>
         </div>
+    </div>
+</div>
 
-    }
-else
-    {
-        <p>Loading applicant details...</p>
-    }
 
     
 @code {
-    private LoanObservation[] applicants = [];
-    private int currentApplicant = 0;
-    private int totalApplicants = 10;
+    private int applicantIndex = 0;
+    private ApplicantDetail currentApplicant =>
+        applicantIndex < gameData.Applicants.Count() ? gameData.Applicants[applicantIndex] : new();
 
     // Editable loan details
     private float loanAmount;
@@ -76,86 +76,106 @@ else
     private float upfrontCharges;
     private float term;
 
-    private bool submitted;
+    // validation errors
+    public string validationError = "";
 
-    protected override async Task OnInitializedAsync()
+    protected override async void OnInitialized()
     {
-        LoadApplicants();
-    }
-
-    private void LoadApplicants()
-    {
-        // For demonstration, generate sample data
-        // In a real scenario, this would be fetched from the API
-
-        applicants = [..Enumerable.Range(0, totalApplicants).Select(index =>
+        if (gameData.State != GameState.APPLICANTS_LOADED)
         {
-            var random = new Random(index+1);
-            return new LoanObservation
-            {
-                LoanAmount = random.Next(100000, 500000),
-                RateOfInterest = (float)(random.NextDouble() * 5 + 3), // 3-8%
-                UpfrontCharges = random.Next(1000, 10000),
-                Term = random.Next(6, 180), // 0.5 - 15years
-                PropertyValue = random.Next(200000, 600000),
-                Income = random.Next(40000, 150000),
-                CreditScore = random.Next(600, 850),
-                Age = random.Next(0, 2) == 0 ? "25-34" : "35-44",
-                Region = random.Next(0, 2) == 0 ? "Urban" : "Suburban",
-                DebtToIncomeRatio = (float)(random.NextDouble() * 0.5) // 0-0.5
-            };
-        })];
-
-        
-        loanAmount = applicants[currentApplicant].LoanAmount;
-        rateOfInterest = applicants[currentApplicant].RateOfInterest;
-        upfrontCharges = applicants[currentApplicant].UpfrontCharges;
-        term = applicants[currentApplicant].Term / 12;
-
-    }
-
-    private void Deny()
-    {
-        applicants[currentApplicant]?.Status = false;
-
-        Next();
-    }
-
-    private void Lend()
-    {
-        applicants[currentApplicant]?.LoanAmount = loanAmount;
-        applicants[currentApplicant]?.RateOfInterest = rateOfInterest;
-        applicants[currentApplicant]?.UpfrontCharges = upfrontCharges;
-        applicants[currentApplicant]?.Term = term * 12;
-        applicants[currentApplicant]?.Status = true;
-
-        Next();
-    }
-
-    private void Next()
-    {
-        if (currentApplicant == totalApplicants - 1)
-        {
-            Submit();
+            navManager.NavigateTo("/");
             return;
         }
-        currentApplicant++;
 
-        loanAmount = applicants[currentApplicant].LoanAmount;
-        rateOfInterest = applicants[currentApplicant].RateOfInterest;
-        upfrontCharges = applicants[currentApplicant].UpfrontCharges;
-        term = applicants[currentApplicant].Term / 12;
+        loanAmount = currentApplicant.LoanAmount;
+        rateOfInterest = currentApplicant.RateOfInterest;
+        upfrontCharges = currentApplicant.UpfrontCharges;
+        term = currentApplicant.Term / 12;
     }
 
-    private void Submit()
+    private async Task Deny()
     {
-        submitted = true;
+        currentApplicant.Status = true;
 
-        // TODO: submit the observations to the API for prediction
-        foreach (var applicant in applicants)
+        await Next();
+    }
+
+    private async Task Lend()
+    {
+        // you can not lend what you don't have
+        if (gameData.Balance - loanAmount < 0)
         {
-            JS.InvokeVoidAsync("console.dir", (object)applicants);
+            validationError = "You don't have sufficient fund.";
+            return;
         }
 
+        if (loanAmount < 0)
+        {
+            validationError = $"Loan amount can not be negative.";
+            return;
+        }
+
+        // interest rate should be between 2.0 and 10.0
+        if (rateOfInterest < 2.0 || rateOfInterest > 10.0)
+        {
+            validationError = $"Interest rate should be 2.0% to 10.0%.";
+            return;
+        }
+
+        // upfront charges should be between 0 and 100k
+        if (upfrontCharges < 0)
+        {
+            validationError = "Upfront charges can not be negative.";
+            return;
+        }
+        else if (upfrontCharges > 100000)
+        {
+            validationError = "Upfront charges should be less than $100,000.";
+            return;
+        }
+
+        // term should be 3 to 30 years
+        if (term < 3 || term > 30)
+        {
+            validationError = "Term should be 3 to 30 years.";
+            return;
+        }
+
+        gameData.LentAmount += loanAmount;
+        gameData.Balance -= loanAmount;
+
+        currentApplicant.LoanAmount = loanAmount;
+        currentApplicant.RateOfInterest = rateOfInterest;
+        currentApplicant.UpfrontCharges = upfrontCharges;
+        currentApplicant.Term = term * 12;
+        currentApplicant.Status = false;
+
+        await Next();
+    }
+
+    private async Task Next()
+    {
+        validationError = "";
+
+        if (applicantIndex == gameData.TotalApplicants - 1)
+        {
+            await Submit();
+            return;
+        }
+        applicantIndex++;
+
+        loanAmount = currentApplicant.LoanAmount;
+        rateOfInterest = currentApplicant.RateOfInterest;
+        upfrontCharges = currentApplicant.UpfrontCharges;
+        term = currentApplicant.Term / 12;
+    }
+
+    private async Task Submit()
+    {
+        await gameData.MakePredictions();
+        if (gameData.State == GameState.PREDICTION_SUCCESS)
+        {
+            navManager.NavigateTo("/result");
+        }
     }
 }

@@ -1,6 +1,6 @@
 namespace LoanShark.Ui.Entities;
 
-public class LoanObservation
+public class ApplicantDetail
 {
     public float LoanAmount { get; set; }
     public float RateOfInterest { get; set; }
@@ -13,4 +13,6 @@ public class LoanObservation
     public string Region { get; set; } = "";
     public float DebtToIncomeRatio { get; set; }
     public bool Status { get; set; }
+    public float EarnableInterest => LoanAmount * (float)Math.Pow(1 + RateOfInterest / 100, Term / 12);
+    public float SalvageValue => PropertyValue * (float)Math.Pow(1 - RateOfInterest / 100, Term / 12);
 }

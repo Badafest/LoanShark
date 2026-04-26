@@ -1,0 +1,154 @@
+.results-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.results-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  padding: 1rem 1.25rem;
+  border: 2px solid rgba(0, 76, 176, 0.2);
+  border-radius: 1.25rem;
+  background-color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0.125rem 0.35rem rgba(0, 0, 0, 0.08);
+}
+
+.summary-card h3 {
+  margin: 0 0 0.5rem;
+  color: var(--blue);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.summary-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.score-card {
+  border-color: rgba(78, 163, 32, 0.3);
+}
+
+.results-list {
+  max-height: 80dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-right: 0.5rem;
+}
+
+.result-card {
+  padding: 1rem 1.25rem;
+  border: 3px solid;
+  border-radius: 1.5rem;
+  background-color: rgba(253, 251, 240, 0.95);
+  box-shadow: 0 0.15rem 0.35rem rgba(0, 0, 0, 0.08);
+}
+
+.result-card.safe {
+  border-color: var(--green);
+  background-color: rgba(78, 163, 32, 0.08);
+}
+
+.result-card.missed {
+  border-color: var(--blue);
+  background-color: rgba(0, 76, 176, 0.08);
+}
+
+.result-card.lost {
+  border-color: var(--red);
+  background-color: rgba(189, 0, 13, 0.08);
+}
+
+.result-card.regained {
+  border-color: var(--green);
+  background-color: rgba(78, 163, 32, 0.12);
+}
+
+.result-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.result-card-title {
+  color: var(--blue);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.result-card-badge {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-safe,
+.badge-regained {
+  background-color: var(--green);
+}
+
+.badge-missed {
+  background-color: var(--blue);
+}
+
+.badge-lost {
+  background-color: var(--red);
+}
+
+.result-card-body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.result-label {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.result-value {
+  color: #222;
+  text-align: right;
+}
+
+.highlight-row {
+  border-top: 1px dashed rgba(0, 0, 0, 0.15);
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .results-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .result-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .result-value {
+    text-align: left;
+  }
+}

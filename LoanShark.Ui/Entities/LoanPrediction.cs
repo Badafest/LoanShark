@@ -1,6 +1,6 @@
 namespace LoanShark.Ui.Entities;
 
-public class LoanPrediction
+public class Prediction
 {
     public bool Status { get; set; }
     public float Score { get; set; }

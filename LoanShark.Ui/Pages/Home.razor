@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject NavigationManager NavManager
+@inject GameData gameData
 
 <h1 id="game-title">LOAN SHARK</h1>
 
@@ -14,9 +15,13 @@
 </button>
 
 @code {
-    void GoToGame()
+    async Task GoToGame()
     {
-        NavManager.NavigateTo("/play");
+        await gameData.LoadApplicantDetails();
+        if (gameData.State == GameState.APPLICANTS_LOADED)
+        {
+            NavManager.NavigateTo("/play");
+        }
     }
 }
 

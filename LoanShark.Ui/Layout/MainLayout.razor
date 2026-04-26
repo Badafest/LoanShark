@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-@inject IJSRuntime JS
+@inject IJSRuntime jsRuntime
 
 <header>
     <nav>
@@ -44,7 +44,7 @@
     {
         if (firstRender)
         {
-            await JS.InvokeVoidAsync("init");
+            await jsRuntime.InvokeVoidAsync("init");
         }
     }
 }

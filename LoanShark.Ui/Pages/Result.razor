@@ -1,0 +1,174 @@
+@page "/result"
+@inject IJSRuntime jsRuntime
+@inject NavigationManager navManager;
+@inject GameData gameData;
+
+<div class="results-page">
+    <div class="results-summary">
+        <div class="summary-card">
+            <h3>Loan Lent</h3>
+            <div class="summary-value">@FormatCurrency(gameData.LentAmount)</div>
+        </div>
+        <div class="summary-card">
+            <h3>Amount Earned</h3>
+            <div class="summary-value">@FormatCurrency(ActualAmount)</div>
+        </div>
+        <div class="summary-card">
+            <h3>Potential Amount</h3>
+            <div class="summary-value">@FormatCurrency(PotentialAmount)</div>
+        </div>
+        <div class="summary-card score-card">
+            <h3>Score</h3>
+            <div class="summary-value">@FormatPercentage(PotentialAmount > 0 ? ActualAmount / PotentialAmount : 0)</div>
+        </div>
+    </div>
+
+    <div class="results-list">
+        @for (int index = 0; index < gameData.Applicants.Count(); index++)
+        {
+            var applicant = gameData.Applicants[index];
+            var prediction = gameData.Predictions[index];
+            var outcomeClass = GetOutcomeClass(applicant.Status, prediction.Status);
+            var outcomeText = GetOutcomeText(applicant.Status, prediction.Status);
+            var interestAmount = applicant.EarnableInterest - applicant.LoanAmount;
+
+            <div class="result-card @outcomeClass">
+                <div class="result-card-header">
+                    <div class="result-card-title">Applicant @((index + 1))</div>
+                    <div class="result-card-badge @GetBadgeClass(outcomeClass)">@GetBadgeLabel(applicant.Status,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    prediction.Status)</div>
+                    </div>
+                    <div class="result-card-body">
+                        <div class="result-row">
+                            <span class="result-label">Outcome</span>
+                            <span class="result-value">@outcomeText</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Prediction</span>
+                            <span class="result-value">@(prediction.Status ? "Safe" : "Risky")</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Decision</span>
+                            <span class="result-value">@(applicant.Status ? "Lend" : "Deny")</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Loan Amount</span>
+                            <span class="result-value">@FormatCurrency(applicant.LoanAmount)</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Rate of Interest</span>
+                            <span class="result-value">@applicant.RateOfInterest.ToString("0.00") %</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Upfront Charges</span>
+                            <span class="result-value">@FormatCurrency(applicant.UpfrontCharges)</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Term</span>
+                            <span class="result-value">@((applicant.Term / 12f).ToString("0.0")) years</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Projected Return</span>
+                            <span class="result-value">@FormatCurrency(applicant.EarnableInterest)</span>
+                        </div>
+                        @if (!prediction.Status && applicant.Status)
+                        {
+                            <div class="result-row highlight-row">
+                                <span class="result-label">Missed Interest</span>
+                                <span class="result-value">@FormatCurrency(interestAmount)</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+@code {
+    private float ActualAmount = 0;
+    private float PotentialAmount = 0;
+
+    protected override void OnInitialized()
+    {
+        if (gameData.State != GameState.PREDICTION_SUCCESS)
+        {
+            navManager.NavigateTo("/");
+            return;
+        }
+
+        for (int i = 0; i < gameData.TotalApplicants; i++)
+        {
+            var applicant = gameData.Applicants[i];
+            var prediction = gameData.Predictions[i];
+            var earnableAmount = applicant.LoanAmount + applicant.EarnableInterest;
+
+            if (!prediction.Status)
+            {
+                PotentialAmount += earnableAmount;
+            }
+
+            if (applicant.Status)
+            {
+                continue;
+            }
+
+            ActualAmount += prediction.Status ? applicant.SalvageValue : earnableAmount;
+        }
+    }
+
+    private static string GetOutcomeText(bool applicantStatus, bool predictionStatus)
+    {
+        return (predictionStatus, applicantStatus) switch
+        {
+            (true, true) => "Safe decision",
+            (false, true) => "Lost opportunity",
+            (true, false) => "Lost loan amount",
+            (false, false) => "Regained loan & interest"
+        };
+    }
+
+    private static string GetOutcomeClass(bool applicantStatus, bool predictionStatus)
+    {
+        return (predictionStatus, applicantStatus) switch
+        {
+            (true, true) => "safe",
+            (false, true) => "missed",
+            (true, false) => "lost",
+            (false, false) => "regained"
+        };
+    }
+
+    private static string GetBadgeClass(string outcomeClass)
+    {
+        return outcomeClass switch
+        {
+            "safe" => "badge-safe",
+            "missed" => "badge-missed",
+            "lost" => "badge-lost",
+            "regained" => "badge-regained",
+            _ => string.Empty
+        };
+    }
+
+    private static string GetBadgeLabel(bool applicantStatus, bool predictionStatus)
+    {
+        return (predictionStatus, applicantStatus) switch
+        {
+            (true, true) => "Safe",
+            (false, true) => "Missed",
+            (true, false) => "Loss",
+            (false, false) => "Win"
+        };
+    }
+
+    private static string FormatCurrency(float amount)
+    {
+        return amount.ToString("C0");
+    }
+
+    private static string FormatPercentage(float ratio)
+    {
+        return ratio.ToString("P0");
+    }
+}
+

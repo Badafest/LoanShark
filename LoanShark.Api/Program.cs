@@ -25,6 +25,18 @@ builder.Services.AddOpenApi();
 // Validation
 builder.Services.AddValidation();
 
+// CORS
+builder.Services.AddCors(config =>
+{
+    config.AddDefaultPolicy(policy =>
+    {
+        policy
+            .WithOrigins(builder.Configuration.GetSection("AllowedOrigins")!.Get<string[]>()!)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,6 +46,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 var group = app.MapGroup("/api");
 
