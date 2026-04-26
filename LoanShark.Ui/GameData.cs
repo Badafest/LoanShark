@@ -18,7 +18,7 @@ public class GameData(Api api)
     private readonly Api _api = api;
     public GameState State { get; private set; }
     public readonly ushort TotalApplicants = 15;
-    public float Balance = 5000000;
+    public float Balance = 0;
     public float LentAmount = 0;
     public ApplicantDetail[] Applicants { get; private set; } = [];
     public Prediction[] Predictions { get; set; } = [];
@@ -29,6 +29,8 @@ public class GameData(Api api)
         try
         {
             Applicants = await _api.Generate(TotalApplicants);
+            // allow 80% funds
+            Balance = 0.8f * Applicants.Sum(a => a.LoanAmount);
             State = GameState.APPLICANTS_LOADED;
         }
         catch (Exception ex)
@@ -58,5 +60,7 @@ public class GameData(Api api)
         Applicants = [];
         Predictions = [];
         State = GameState.WAITING;
+        Balance = 5000000;
+        LentAmount = 0;
     }
 }

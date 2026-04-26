@@ -5,20 +5,20 @@
 
 <div class="results-summary">
     <div class="summary-card">
-        <h3>Loan Lent</h3>
+        <h3>Loan Amount</h3>
         <div class="summary-value">@gameData.LentAmount.ToString("C0")</div>
     </div>
     <div class="summary-card">
-        <h3>Amount Earned</h3>
-        <div class="summary-value">@ActualAmount.ToString("C0")</div>
+        <h3>Earned Profit</h3>
+        <div class="summary-value">@ActualProfit.ToString("C0")</div>
     </div>
     <div class="summary-card">
-        <h3>Potential Amount</h3>
-        <div class="summary-value">@PotentialAmount.ToString("C0")</div>
+        <h3>Earnable Profit</h3>
+        <div class="summary-value">@PotentialProfit.ToString("C0")</div>
     </div>
     <div class="summary-card score-card">
         <h3>Score</h3>
-        <div class="summary-value">@((PotentialAmount > 0 ? ActualAmount / PotentialAmount : 0).ToString("P0"))</div>
+        <div class="summary-value">@((PotentialProfit > 0 ? ActualProfit / PotentialProfit : 100).ToString("P0"))</div>
     </div>
 </div>
 
@@ -28,7 +28,6 @@
         var applicant = gameData.Applicants[index];
         var prediction = gameData.Predictions[index];
         var outcomeClass = GetOutcomeClass(applicant.Status, prediction.Status);
-        var interestAmount = applicant.EarnableInterest - applicant.LoanAmount;
 
         <div class="result-card @outcomeClass">
 
@@ -39,34 +38,29 @@
                 </div>
             </div>
 
-
             <div class="result-row">
                 <span class="result-label">Loan Amount</span>
-                <span class="result-value">@applicant.LoanAmount.ToString("C0"))</span>
+                <span class="result-value">@applicant.LoanAmount.ToString("C0")</span>
             </div>
             <div class="result-row">
-                <span class="result-label">Rate of Interest</span>
-                <span class="result-value">@applicant.RateOfInterest.ToString("0.00") %</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Upfront Charges</span>
-                <span class="result-value">@applicant.UpfrontCharges.ToString("C0")</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Term</span>
-                <span class="result-value">@((applicant.Term / 12f).ToString("0.0")) years</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Projected Return</span>
+                <span class="result-label">Total Interest</span>
                 <span class="result-value">@applicant.EarnableInterest.ToString("C0")</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Salvage Amount</span>
+                <span class="result-value">@applicant.SalvageValue.ToString("C0")</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Earned Profit</span>
+                <span class="result-value">@applicant.EarnedProfit.ToString("C0")</span>
             </div>
         </div>
     }
 </div>
 
 @code {
-    private float ActualAmount = 0;
-    private float PotentialAmount = 0;
+    private float ActualProfit = 0;
+    private float PotentialProfit = 0;
 
     protected override void OnInitialized()
     {
@@ -80,19 +74,22 @@
         {
             var applicant = gameData.Applicants[i];
             var prediction = gameData.Predictions[i];
-            var earnableAmount = applicant.LoanAmount + applicant.EarnableInterest;
 
-            if (!prediction.Status)
+            float earnableProfit = 0;
+
+            if (prediction.Status)
             {
-                PotentialAmount += earnableAmount;
+                earnableProfit = applicant.SalvageValue - applicant.LoanAmount;
+            }
+            else
+            {
+                earnableProfit = applicant.EarnableInterest;
             }
 
-            if (applicant.Status)
-            {
-                continue;
-            }
+            PotentialProfit += Math.Max(0, earnableProfit);
 
-            ActualAmount += prediction.Status ? applicant.SalvageValue : earnableAmount;
+            applicant.EarnedProfit = applicant.Status ? 0 : earnableProfit;
+            ActualProfit += applicant.EarnedProfit;
         }
     }
 
@@ -124,7 +121,7 @@
         return (predictionStatus, applicantStatus) switch
         {
             (true, true) => "Safe",
-            (false, true) => "Missed",
+            (false, true) => "Miss",
             (true, false) => "Loss",
             (false, false) => "Win"
         };

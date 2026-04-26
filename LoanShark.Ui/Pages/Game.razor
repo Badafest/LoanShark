@@ -109,9 +109,18 @@
             return;
         }
 
-        if (loanAmount < 0)
+        // loan amount should be 20 to 120 percent of property value
+        var minLoanAmount = 0.2 * currentApplicant.PropertyValue;
+        if (loanAmount < minLoanAmount)
         {
-            validationError = $"Loan amount can not be negative.";
+            validationError = $"Loan amount should be at least {minLoanAmount.ToString("C0")}";
+            return;
+        }
+
+        var maxLoanAmount = 1.2 * currentApplicant.PropertyValue;
+        if (loanAmount > maxLoanAmount)
+        {
+            validationError = $"Loan amount should be less than {maxLoanAmount.ToString("C0")}";
             return;
         }
 
@@ -122,15 +131,17 @@
             return;
         }
 
-        // upfront charges should be between 0 and 100k
+        // upfront charges should be between 0 and 10% of property value
         if (upfrontCharges < 0)
         {
             validationError = "Upfront charges can not be negative.";
             return;
         }
-        else if (upfrontCharges > 100000)
+
+        var maxUpfrontCharges = 0.1 * currentApplicant.PropertyValue;
+        if (upfrontCharges > maxUpfrontCharges)
         {
-            validationError = "Upfront charges should be less than $100,000.";
+            validationError = $"Upfront charges should be less than {maxUpfrontCharges.ToString("C0")}";
             return;
         }
 

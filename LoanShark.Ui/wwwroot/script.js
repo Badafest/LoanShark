@@ -3,8 +3,8 @@ const BGM_VOLUME = 0.2;
 // BGM FROM: https://pixabay.com/sound-effects/musical-kids-funk-intro-music-499479
 const bgm = new Audio("/bombinsound-kids-funk-intro-music-499479.mp3");
 bgm.loop = true;
-bgm.autoplay = false;
-bgm.volume = 0;
+bgm.autoplay = true;
+bgm.volume = BGM_VOLUME;
 
 // ICONS FROM: https://heroicons.com
 const playingIcon = `

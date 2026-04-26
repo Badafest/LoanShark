@@ -17,6 +17,7 @@
 @code {
     async Task GoToGame()
     {
+        gameData.Reset();
         await gameData.LoadApplicantDetails();
         if (gameData.State == GameState.APPLICANTS_LOADED)
         {
