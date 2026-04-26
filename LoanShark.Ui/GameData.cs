@@ -17,8 +17,8 @@ public class GameData(Api api)
 {
     private readonly Api _api = api;
     public GameState State { get; private set; }
-    public readonly ushort TotalApplicants = 10;
-    public float Balance = 1000000;
+    public readonly ushort TotalApplicants = 15;
+    public float Balance = 5000000;
     public float LentAmount = 0;
     public ApplicantDetail[] Applicants { get; private set; } = [];
     public Prediction[] Predictions { get; set; } = [];
