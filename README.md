@@ -53,3 +53,4 @@ Based on the prediction:
 - Background Music: [Pixabay](https://pixabay.com/sound-effects/musical-kids-funk-intro-music-499479)
 - Icons: [Hero Icons](https://heroicons.com)
 - Favicon: [Pixabay](https://pixabay.com/vectors/shark-jaws-fish-underwater-smile-9309602)
+- Font: [Google Fonts](https://fonts.google.com/specimen/Fredoka)
