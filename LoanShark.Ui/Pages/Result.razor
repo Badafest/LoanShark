@@ -33,7 +33,7 @@
 
             <div class="result-card-header">
                 <div class="result-card-title">Applicant @((index + 1))</div>
-                <div class="result-card-badge @GetBadgeClass(outcomeClass)">
+                <div class="result-card-badge badge-@outcomeClass">
                     @GetBadgeLabel(applicant.Status, prediction.Status)
                 </div>
             </div>
@@ -101,18 +101,6 @@
             (false, true) => "missed",
             (true, false) => "lost",
             (false, false) => "regained"
-        };
-    }
-
-    private static string GetBadgeClass(string outcomeClass)
-    {
-        return outcomeClass switch
-        {
-            "safe" => "badge-safe",
-            "missed" => "badge-missed",
-            "lost" => "badge-lost",
-            "regained" => "badge-regained",
-            _ => string.Empty
         };
     }
 
