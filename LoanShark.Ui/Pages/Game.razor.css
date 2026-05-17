@@ -1,0 +1,88 @@
+* {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+/* Card styles */
+.card {
+  padding: 0 2rem;
+}
+
+.card-body {
+  border: 4px solid var(--blue);
+  border-radius: 1rem 4rem 2rem 3rem;
+  background-color: var(--background);
+  padding: 1rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3rem;
+}
+
+.card-body p {
+  margin: 1rem 0 1rem;
+}
+
+/* Form styles */
+.form-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0 0.5rem;
+  gap: 0 1rem;
+  flex-wrap: wrap;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--blue);
+  flex-shrink: 0;
+}
+
+.form-control {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--blue);
+  border-radius: 0.25rem;
+  background-color: var(--background);
+  color: #333;
+  width: 6rem;
+  flex-shrink: 1;
+}
+
+.form-control:focus {
+  outline: 2px solid var(--blue);
+}
+
+/* Button group */
+.top-bar {
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.top-bar h2 {
+  margin: 0;
+  color: var(--blue);
+  font-size: 1.75rem;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.deny-btn {
+  border-radius: 1rem 2rem 1.5rem 1.75rem;
+  background-color: var(--red);
+  outline-color: var(--red);
+  color: white;
+}
+
+.lend-btn {
+  border-radius: 2rem 1.5rem 1.75rem 1.5rem;
+  background-color: var(--green);
+  outline-color: var(--green);
+  color: white;
+}

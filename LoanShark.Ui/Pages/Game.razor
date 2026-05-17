@@ -1,0 +1,192 @@
+@page "/play"
+@inject IJSRuntime jsRuntime
+@inject GameData gameData
+@inject NavigationManager navManager
+
+
+<div>
+    <div class="top-bar">
+        <div>
+            <span>Application</span>
+            <h2>@(applicantIndex + 1)/@gameData.TotalApplicants</h2>
+        </div>
+        <div>
+            <span>Balance</span>
+            <h2>@gameData.Balance.ToString("C0")</h2>
+        </div>
+        <div class="button-group top-buttons">
+            <button class="btn deny-btn" @onclick="Deny" disabled="@(gameData.State == GameState.PREDICTING)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="5"
+                     stroke="currentColor" height="1.5rem">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <button class="btn lend-btn" @onclick="Lend" disabled="@(gameData.State == GameState.PREDICTING)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="5"
+                     stroke="currentColor" height="1.5rem">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            @* APPLICANT DETAILS - CAN NOT CHANGE *@
+            <div>
+                <p>Age Group: @currentApplicant.Age</p>
+                <p>Income: @currentApplicant.Income.ToString("C0")</p>
+                <p>Debt: @((currentApplicant.DebtToIncomeRatio * currentApplicant.Income).ToString("C0"))</p>
+                <p>Property Value: @currentApplicant.PropertyValue.ToString("C0")</p>
+                <p>Credit Score: @currentApplicant.CreditScore</p>
+            </div>
+            @* LOAN DETAILS - PLAYER CAN CHANGE DEFAULT VALUES *@
+            <div>
+                <div class="form-group">
+                    <label>Loan Amount:</label>
+                    <input type="number" @bind="loanAmount" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Interest Rate (%):</label>
+                    <input type="number" step="0.01" @bind="rateOfInterest" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Upfront Charges:</label>
+                    <input type="number" @bind="upfrontCharges" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Term (years):</label>
+                    <input type="number" @bind="term" class="form-control" step='0.5' />
+                </div>
+                <p style="color: var(--red)">@validationError</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    
+@code {
+    private int applicantIndex = 0;
+    private ApplicantDetail currentApplicant =>
+        applicantIndex < gameData.Applicants.Count() ? gameData.Applicants[applicantIndex] : new();
+
+    // Editable loan details
+    private float loanAmount;
+    private float rateOfInterest;
+    private float upfrontCharges;
+    private float term;
+
+    // validation errors
+    public string validationError = "";
+
+    protected override async void OnInitialized()
+    {
+        if (gameData.State != GameState.APPLICANTS_LOADED)
+        {
+            navManager.NavigateTo("/");
+            return;
+        }
+
+        loanAmount = currentApplicant.LoanAmount;
+        rateOfInterest = currentApplicant.RateOfInterest;
+        upfrontCharges = currentApplicant.UpfrontCharges;
+        term = currentApplicant.Term / 12;
+    }
+
+    private async Task Deny()
+    {
+        currentApplicant.Status = true;
+
+        await Next();
+    }
+
+    private async Task Lend()
+    {
+        // you can not lend what you don't have
+        if (gameData.Balance - loanAmount < 0)
+        {
+            validationError = "You don't have sufficient fund.";
+            return;
+        }
+
+        // loan amount should be 20 to 120 percent of property value
+        var minLoanAmount = 0.2 * currentApplicant.PropertyValue;
+        if (loanAmount < minLoanAmount)
+        {
+            validationError = $"Loan amount should be at least {minLoanAmount.ToString("C0")}";
+            return;
+        }
+
+        var maxLoanAmount = 1.2 * currentApplicant.PropertyValue;
+        if (loanAmount > maxLoanAmount)
+        {
+            validationError = $"Loan amount should be less than {maxLoanAmount.ToString("C0")}";
+            return;
+        }
+
+        // interest rate should be between 2.0 and 10.0
+        if (rateOfInterest < 2.0 || rateOfInterest > 10.0)
+        {
+            validationError = $"Interest rate should be 2.0% to 10.0%.";
+            return;
+        }
+
+        // upfront charges should be between 0 and 10% of property value
+        if (upfrontCharges < 0)
+        {
+            validationError = "Upfront charges can not be negative.";
+            return;
+        }
+
+        var maxUpfrontCharges = 0.1 * currentApplicant.PropertyValue;
+        if (upfrontCharges > maxUpfrontCharges)
+        {
+            validationError = $"Upfront charges should be less than {maxUpfrontCharges.ToString("C0")}";
+            return;
+        }
+
+        // term should be 3 to 30 years
+        if (term < 3 || term > 30)
+        {
+            validationError = "Term should be 3 to 30 years.";
+            return;
+        }
+
+        gameData.LentAmount += loanAmount;
+        gameData.Balance -= loanAmount;
+
+        currentApplicant.LoanAmount = loanAmount;
+        currentApplicant.RateOfInterest = rateOfInterest;
+        currentApplicant.UpfrontCharges = upfrontCharges;
+        currentApplicant.Term = term * 12;
+        currentApplicant.Status = false;
+
+        await Next();
+    }
+
+    private async Task Next()
+    {
+        validationError = "";
+
+        if (applicantIndex == gameData.TotalApplicants - 1)
+        {
+            await Submit();
+            return;
+        }
+        applicantIndex++;
+
+        loanAmount = currentApplicant.LoanAmount;
+        rateOfInterest = currentApplicant.RateOfInterest;
+        upfrontCharges = currentApplicant.UpfrontCharges;
+        term = currentApplicant.Term / 12;
+    }
+
+    private async Task Submit()
+    {
+        await gameData.MakePredictions();
+        if (gameData.State == GameState.PREDICTION_SUCCESS)
+        {
+            navManager.NavigateTo("/result");
+        }
+    }
+}

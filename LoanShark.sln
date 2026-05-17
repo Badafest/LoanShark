@@ -1,19 +1,46 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoanShark.Api", "LoanShark.Api\LoanShark.Api.csproj", "{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoanShark.Ui", "LoanShark.Ui\LoanShark.Ui.csproj", "{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Debug|x64.Build.0 = Debug|Any CPU
+		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Debug|x86.Build.0 = Debug|Any CPU
 		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Release|x64.ActiveCfg = Release|Any CPU
+		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Release|x64.Build.0 = Release|Any CPU
+		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Release|x86.ActiveCfg = Release|Any CPU
+		{D11F7728-AEE7-082C-EC3B-89B7A8BBCF14}.Release|x86.Build.0 = Release|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Debug|x64.Build.0 = Debug|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Debug|x86.Build.0 = Debug|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Release|x64.ActiveCfg = Release|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Release|x64.Build.0 = Release|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Release|x86.ActiveCfg = Release|Any CPU
+		{CAF3A2DF-5966-4BED-BEA3-2DED0662638A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
