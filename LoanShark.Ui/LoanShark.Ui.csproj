@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
+    <WasmApplicationEnvironmentName>$(ASPNETCORE_ENVIRONMENT)</WasmApplicationEnvironmentName>
+    <WasmApplicationEnvironmentName Condition="'$(WasmApplicationEnvironmentName)' == ''">Production</WasmApplicationEnvironmentName>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -9,7 +14,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer"
+      Version="10.0.2" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

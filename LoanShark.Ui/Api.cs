@@ -13,7 +13,7 @@ public class Api(Uri baseAddress)
 
     public async Task<ApplicantDetail[]> Generate(ushort n)
     {
-        var applicants = await _httpClient.GetFromJsonAsync<ApplicantDetail[]>($"/api/generate?n={n}");
+        var applicants = await _httpClient.GetFromJsonAsync<ApplicantDetail[]>($"api/generate?n={n}");
 
         // validation of loan amount and upfront charges
         foreach (var applicant in applicants!)
@@ -27,7 +27,7 @@ public class Api(Uri baseAddress)
 
     public async Task<Prediction[]> Predict(ApplicantDetail[] applicants)
     {
-        var response = await _httpClient.PostAsJsonAsync($"/api/predict", applicants);
+        var response = await _httpClient.PostAsJsonAsync("api/predict", applicants);
 
         response.EnsureSuccessStatusCode();
 
