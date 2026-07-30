@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="LoanShark.Api/LoanShark.Api.csproj" />
+  <Project Path="LoanShark.Ui/LoanShark.Ui.csproj" />
+</Solution>

@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using LoanShark.Api;
 using LoanShark.Api.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.ML;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,9 +19,6 @@ builder.Services
 
 // Synthetic data generator
 builder.Services.AddSingleton(_ => new SyntheticDataGenerator(builder.Configuration["CdfsPath"]!));
-
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 // Validation
 builder.Services.AddValidation();
@@ -40,14 +38,15 @@ builder.Services.AddCors(config =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
 app.UseHttpsRedirection();
 
 app.UseCors();
+
+// Static files
+var provider = new FileExtensionContentTypeProvider();
+provider.Mappings[".dat"] = "application/octet-stream";
+
+app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
 
 var group = app.MapGroup("/api");
 
@@ -70,6 +69,9 @@ group.MapPost("/predict", async (
     return Results.Ok(predictions);
 }
 );
+
+// Default to index.html
+app.MapFallbackToFile("index.html");
 
 app.Run();
 
